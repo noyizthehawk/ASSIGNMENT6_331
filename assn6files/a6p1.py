@@ -40,13 +40,71 @@ def ngramsFreqsFromFile(textFile: str, n: int) -> dict:
     """
     textFile: 'wells.txt'   this will be the string which is a path to the file
     """
-    # raise NotImplementedError()
+    ngram_counts = {}
+    
+    # Read the file
+    with open(textFile, 'r', encoding='utf-8') as file:
+        content = file.read()
+    
+    
+    content = content.upper()
+    
+   
+    filtered_content = ''.join(char for char in content if char.isupper() or char == ' ')
+    
+    
+    total_ngrams = 0
+    for i in range(len(filtered_content) - n + 1):
+        ngram = filtered_content[i:i+n]
+        if ngram in ngram_counts:
+            ngram_counts[ngram] += 1
+        else:
+            ngram_counts[ngram] = 1
+        total_ngrams += 1
+    
+    
+    ngram_freqs = {}
+    for ngram, count in ngram_counts.items():
+        ngram_freqs[ngram] = count / total_ngrams
+    
+    return ngram_freqs
     
 
 def test():
     "Run tests"
-    # TODO: test thoroughly by writing your own regression tests
-    # This function is ignored in our marking
+    import tempfile
+    
+    
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp:
+        temp.write("Hello World! This is a test.")
+        temp_name = temp.name
+    
+    
+    unigram_freqs = ngramsFreqsFromFile(temp_name, 1)
+    print("Unigram frequencies:")
+    for unigram, freq in sorted(unigram_freqs.items()):
+        print(f"'{unigram}': {freq:.4f}")
+    
+   
+    bigram_freqs = ngramsFreqsFromFile(temp_name, 2)
+    print("\nBigram frequencies:")
+    for bigram, freq in sorted(bigram_freqs.items()):
+        print(f"'{bigram}': {freq:.4f}")
+    
+   
+    import os
+    os.unlink(temp_name)
+    
+    
+    try:
+        well_freqs = ngramsFreqsFromFile("wells.txt", 3)
+        print("\nTop 5 trigrams from wells.txt:")
+        top_trigrams = sorted(well_freqs.items(), key=lambda x: x[1], reverse=True)[:5]
+        for trigram, freq in top_trigrams:
+            print(f"'{trigram}': {freq:.6f}")
+    except FileNotFoundError:
+        print("\nNote: wells.txt not found in the current directory")
+
 
 if __name__ == "__main__" and not flags.interactive:
     test()

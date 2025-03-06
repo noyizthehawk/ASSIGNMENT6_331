@@ -29,26 +29,74 @@
 #          gkondrak <at> ualberta.ca
 #
 #---------------------------------------------------------------
-
-"""
-Problem 2
-"""
-
 from sys import flags
-
 def keyScore(mapping: dict, ciphertext: str, frequencies: dict, n: int) -> float:
-    raise NotImplementedError()
-  
+
+    
+    decipherment = ''
+    for char in ciphertext:
+        if char in mapping:
+            decipherment += mapping[char]
+        else:
+           
+            decipherment += char
+    
+    
+    ngram_counts = {}
+    for i in range(len(decipherment) - n + 1):
+        ngram = decipherment[i:i+n]
+        if ngram in ngram_counts:
+            ngram_counts[ngram] += 1
+        else:
+            ngram_counts[ngram] = 1
+    
+   
+    score = 0.0
+    for ngram, count in ngram_counts.items():
+        
+        frequency = frequencies.get(ngram, 0.0)
+        score += count * frequency
+    
+    return score
+
 
 def test():
-    "Run tests"
-    # TODO: test thoroughly by writing your own regression tests
-    # This function is ignored in our marking
+    """Run tests for the keyScore function"""
+    
+    ciphertext = "EEFFFEEF"
+    frequencies = {"EE": 0.5, "EF": 0.2, "FE": 0.3}
+    
+   
+    identity_mapping = {char: char for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ "}
+    
+   
+    score = keyScore(identity_mapping, ciphertext, frequencies, 2)
+    expected_score = (2 * 0.5) + (2 * 0.2) + (1 * 0.3)  # Occurrences: EE(2), EF(2), FE(1), FF(2 but frequency is 0)
+    
+    print(f"Example test case:")
+    print(f"Ciphertext: {ciphertext}")
+    print(f"Calculated score: {score}")
+    print(f"Expected score: {expected_score}")
+    print(f"Test {'passed' if abs(score - expected_score) < 0.000001 else 'failed'}\n")
+    
+    
+    swap_mapping = identity_mapping.copy()
+    swap_mapping['E'] = 'F'
+    swap_mapping['F'] = 'E'
+    
+    
+    swapped_score = keyScore(swap_mapping, ciphertext, frequencies, 2)
+    
+    expected_swapped = (2 * 0.5) + (2 * 0.3) + (1 * 0.2)  
+    print(f"Swapped mapping test case:")
+    print(f"Ciphertext: {ciphertext}")
+    print(f"Calculated score with swapped E/F: {swapped_score}")
+    print(f"Expected score: {expected_swapped}")
+    print(f"Test {'passed' if abs(swapped_score - expected_swapped) < 0.000001 else 'failed'}")
+
 
 if __name__ == "__main__" and not flags.interactive:
     test()
-
-
 
 
 
